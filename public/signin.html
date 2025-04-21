@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Graphics Management</title>
+    <title>Sign In - Graphics Management</title>
     <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
     <style>
         :root {
@@ -147,23 +147,16 @@
             margin-top: 5px;
             display: none;
         }
-
-        .password-requirements {
-            font-size: 12px;
-            color: var(--text-color);
-            margin-top: 5px;
-            opacity: 0.7;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="auth-card">
             <div class="logo">
-                <h1>Sign Up to Upload your Picture</h1>
+                <h1>Sign In</h1>
             </div>
             
-            <form id="signupForm" onsubmit="handleSignup(event)">
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" required autocomplete="email">
@@ -171,34 +164,26 @@
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" required autocomplete="new-password">
-                    <div class="password-requirements">
-                        Password must be at least 8 characters long
-                    </div>
+                    <input type="password" id="password" required autocomplete="current-password">
                 </div>
 
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" required autocomplete="new-password">
-                </div>
-
-                <button type="submit" class="submit-button" id="submitButton">Create Account</button>
+                <button type="submit" class="submit-button" id="submitButton">Sign In</button>
             </form>
 
             <div class="loading" id="loading">
                 <div class="loading-spinner"></div>
-                <p>Creating account...</p>
+                <p>Signing in...</p>
             </div>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="signin.html">Sign in</a></p>
+                <p>Don't have an account? <a href="/public/signup.html">Sign up</a></p>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
         const submitButton = document.getElementById('submitButton');
         const loading = document.getElementById('loading');
 
@@ -212,25 +197,14 @@
             }).showToast();
         }
 
-        async function handleSignup(event) {
+        async function handleLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (!email || !password || !confirmPassword) {
+            if (!email || !password) {
                 showToast('Please fill in all fields', 'error');
-                return;
-            }
-
-            if (password.length < 8) {
-                showToast('Password must be at least 8 characters long', 'error');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showToast('Passwords do not match', 'error');
                 return;
             }
 
@@ -238,24 +212,25 @@
                 submitButton.disabled = true;
                 loading.style.display = 'block';
 
-                const response = await fetch('/api/register', {
+                const response = await fetch('api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ email, password })
                 });
-
+                
                 const data = await response.json();
-                if (response.ok) {
-                    showToast('Account created successfully! Please sign in.');
-                    window.location.href = 'signin.html';
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    showToast('Login successful!');
+                    window.location.href = '/public/shopify-integration.html';
                 } else {
-                    showToast(data.error || 'Registration failed', 'error');
+                    showToast('Invalid email or password', 'error');
                 }
             } catch (error) {
-                showToast('Registration error. Please try again.', 'error');
-                console.error('Registration error:', error);
+                showToast('Login error. Please try again.', 'error');
+                console.error('Login error:', error);
             } finally {
                 submitButton.disabled = false;
                 loading.style.display = 'none';

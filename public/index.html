@@ -176,7 +176,7 @@
             </div>
 
             <div class="auth-footer">
-                <p>Don't have an account? <a href="/public/signup.html">Sign up</a></p>
+                <p>Don't have an account? <a href="signup.html">Sign up</a></p>
             </div>
         </div>
     </div>
@@ -224,7 +224,7 @@
                 if (data.token) {
                     localStorage.setItem('token', data.token);
                     showToast('Login successful!');
-                    window.location.href = '/public/shopify-integration.html';
+                    window.location.href = 'shopify-integration.html';
                 } else {
                     showToast('Invalid email or password', 'error');
                 }

@@ -106,7 +106,7 @@ app.post('/api/upload', authenticateToken, upload.single('graphic'), async (req,
   }
 });
 
-app.get('/api/graphics', authenticateToken, async (req, res) => {
+app.post('/api/graphics', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     res.json({ graphics: user.graphics });
@@ -115,7 +115,7 @@ app.get('/api/graphics', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/api/graphics/:filename', authenticateToken, async (req, res) => {
+app.post('/api/graphics/:filename', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user.graphics.includes(req.params.filename)) {

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Graphics Integration</title>
+    <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #5c6ac4;
+            --success-color: #50b83c;
+            --error-color: #de3618;
+            --warning-color: #ffb82e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .upload-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed #c4cdd5;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(92, 106, 196, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(92, 106, 196, 0.1);
+        }
+
+        .upload-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background-color: #4959b3;
+        }
+
+        .upload-button:disabled {
+            background-color: #c4cdd5;
+            cursor: not-allowed;
+        }
+
+        .graphics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .graphic-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .graphic-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .graphic-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .graphic-info {
+            padding: 15px;
+        }
+
+        .graphic-name {
+            font-weight: 500;
+            margin: 0 0 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form h2 {
+            margin: 0 0 20px 0;
+            text-align: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #212b36;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #c4cdd5;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(92, 106, 196, 0.1);
+        }
+
+        .auth-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-button:hover {
+            background-color: #4959b3;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .auth-switch button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .auth-switch button:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="authSection" class="auth-container">
+        <div id="loginForm" class="auth-form">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button class="auth-button" onclick="handleLogin()">Login</button>
+            <div class="auth-switch">
+                <p>Don't have an account? <button onclick="showSignup()">Sign up</button></p>
+            </div>
+        </div>
+
+        <div id="signupForm" class="auth-form hidden">
+            <h2>Sign Up</h2>
+            <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button class="auth-button" onclick="handleSignup()">Sign Up</button>
+            <div class="auth-switch">
+                <p>Already have an account? <button onclick="showLogin()">Login</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="container hidden">
+        <div class="header">
+            <h1>Graphics Management</h1>
+        </div>
+        
+        <div class="upload-form">
+            <h2>Upload New Graphic</h2>
+            <div class="upload-area" id="uploadArea">
+                <p>Drag and drop your image here, or click to select</p>
+                <input type="file" id="graphicFile" accept="image/*" style="display: none;">
+                <button class="upload-button" id="uploadButton" disabled>Upload</button>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading graphics...</p>
+        </div>
+
+        <div class="graphics-grid" id="graphicsGrid">
+            <!-- Graphics will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('graphicFile');
+        const uploadButton = document.getElementById('uploadButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+        
+        // Check if user is logged in
+        if (!token) {
+            window.location.href = 'signin.html';
+        }
+
+        // Drag and drop handling
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateUploadButton();
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', updateUploadButton);
+
+        function updateUploadButton() {
+            uploadButton.disabled = !fileInput.files.length;
+        }
+
+        function showToast(message, type = 'success') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: type === 'success' ? "var(--success-color)" : "var(--error-color)",
+            }).showToast();
+        }
+
+        function showSignup() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!email || !password || !confirmPassword) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                loading.style.display = 'block';
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showToast('Registration successful! Please login.');
+                    showLogin();
+                    document.getElementById('signupEmail').value = '';
+                    document.getElementById('signupPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    showToast(data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showToast('Registration error. Please try again.', 'error');
+                console.error('Registration error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                loading.style.display = 'block';
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    showToast('Login successful!');
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    loadGraphics();
+                } else {
+                    showToast('Login failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showToast('Login error. Please try again.', 'error');
+                console.error('Login error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Function to upload a graphic
+        async function uploadGraphic() {
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showToast('Please select a file', 'error');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('graphic', file);
+
+            try {
+                loading.style.display = 'block';
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showToast('Upload successful!');
+                    fileInput.value = '';
+                    updateUploadButton();
+                    loadGraphics();
+                } else {
+                    showToast(data.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showToast('Upload error. Please try again.', 'error');
+                console.error('Upload error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Function to load graphics
+        async function loadGraphics() {
+            try {
+                loading.style.display = 'block';
+                const response = await fetch('/api/graphics', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load graphics');
+                }
+
+                const data = await response.json();
+                const graphicsGrid = document.getElementById('graphicsGrid');
+                graphicsGrid.innerHTML = '';
+
+                if (data.graphics.length === 0) {
+                    graphicsGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No graphics uploaded yet</p>';
+                    return;
+                }
+
+                data.graphics.forEach(filename => {
+                    const graphicItem = document.createElement('div');
+                    graphicItem.className = 'graphic-item';
+                    graphicItem.innerHTML = `
+                        <img src="/api/graphics/${filename}" alt="Graphic">
+                        <div class="graphic-info">
+                            <p class="graphic-name">${filename}</p>
+                        </div>
+                    `;
+                    graphicsGrid.appendChild(graphicItem);
+                });
+            } catch (error) {
+                showToast('Error loading graphics', 'error');
+                console.error('Error loading graphics:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Initialize upload button click handler
+        uploadButton.addEventListener('click', uploadGraphic);
+    </script>
+</body>
+</html> 

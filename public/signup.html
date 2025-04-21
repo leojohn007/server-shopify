@@ -249,7 +249,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     showToast('Account created successfully! Please sign in.');
-                    window.location.href = '/public/signin.html';
+                    window.location.href = '/public/index.html';
                 } else {
                     showToast(data.error || 'Registration failed', 'error');
                 }

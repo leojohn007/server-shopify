@@ -1,3 +1,4 @@
+const dotenv = require('dotenv');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -9,6 +10,11 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
+
+
+dotenv.config({
+  path: path.resolve(__dirname, `.env.${process.env.NODE_ENV || 'development'}`)
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -123,7 +129,12 @@ app.get('/api/graphics/:filename', authenticateToken, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT;
+if (!PORT) {
+    console.error('PORT environment variable is not set. This is required for production.');
+    process.exit(1);
+}
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 }); 

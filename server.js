@@ -1,4 +1,4 @@
-require('dotenv').config({ path: process.env.NODE_ENV === 'development' ? '.env.development' : '.env' });
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -9,16 +9,6 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
-
-// Development logging
-if (process.env.NODE_ENV === 'development') {
-    console.log('Running in development mode');
-    console.log('Environment variables:', {
-        PORT: process.env.PORT,
-        MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not set',
-        JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set'
-    });
-}
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -133,15 +123,7 @@ app.get('/api/graphics/:filename', authenticateToken, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT;
-if (!PORT) {
-    console.error('PORT environment variable is not set');
-    process.exit(1);
-}
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    if (process.env.NODE_ENV === 'development') {
-        console.log(`Local development URL: http://localhost:${PORT}`);
-    }
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 }); 
